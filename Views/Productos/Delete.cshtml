@@ -1,0 +1,14 @@
+@model tl2_tp8_2025_Gonz0x.Models.Productos
+
+<h2>Eliminar Producto</h2>
+
+<div class="alert alert-danger">
+    <h4>¿Está seguro que desea eliminar este producto?</h4>
+    <p><strong>@Model.Descripcion</strong> - Precio: @Model.Precio.ToString("C")</p>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="IdProducto" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

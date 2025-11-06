@@ -1,0 +1,13 @@
+@model tl2_tp8_2025_Gonz0x.Models.Presupuestos
+
+<h2>Editar Presupuesto</h2>
+
+<form asp-action="Edit" method="post" class="mt-3">
+    <input type="hidden" asp-for="IdPresupuesto" />
+    <div class="mb-3">
+        <label asp-for="NombreDestinatario" class="form-label">Nombre del Destinatario</label>
+        <input asp-for="NombreDestinatario" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
