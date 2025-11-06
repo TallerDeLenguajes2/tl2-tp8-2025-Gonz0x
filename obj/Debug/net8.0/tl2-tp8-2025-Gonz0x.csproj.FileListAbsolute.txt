@@ -1,0 +1,8 @@
+C:\tl2-tp8-2025-Gonz0x\obj\Debug\net8.0\tl2-tp8-2025-Gonz0x.GeneratedMSBuildEditorConfig.editorconfig
+C:\tl2-tp8-2025-Gonz0x\obj\Debug\net8.0\tl2-tp8-2025-Gonz0x.AssemblyInfoInputs.cache
+C:\tl2-tp8-2025-Gonz0x\obj\Debug\net8.0\tl2-tp8-2025-Gonz0x.AssemblyInfo.cs
+C:\tl2-tp8-2025-Gonz0x\obj\Debug\net8.0\tl2-tp8-2025-Gonz0x.csproj.CoreCompileInputs.cache
+C:\tl2-tp8-2025-Gonz0x\obj\Debug\net8.0\tl2-tp8-2025-Gonz0x.MvcApplicationPartsAssemblyInfo.cache
+C:\tl2-tp8-2025-Gonz0x\obj\Debug\net8.0\tl2-tp8-2025-Gonz0x.RazorAssemblyInfo.cache
+C:\tl2-tp8-2025-Gonz0x\obj\Debug\net8.0\tl2-tp8-2025-Gonz0x.RazorAssemblyInfo.cs
+C:\tl2-tp8-2025-Gonz0x\obj\Debug\net8.0\tl2-tp8-2025-Gonz0x.sourcelink.json
