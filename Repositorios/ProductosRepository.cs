@@ -1,19 +1,18 @@
 using tl2_tp8_2025_Gonz0x.Models;
 using Microsoft.Data.Sqlite;
 
-namespace tl2_tp7_2025_Gonz0x.Repositorios.ProductosRepository
+namespace tl2_tp8_2025_Gonz0x.Repositorios
 {
     public class ProductosRepository
     {
-        private string cadenaConexion = "Data Source=Tienda.db";
+        private string cadenaConexion = "Data Source=DB/Tienda.db";
 
         public void CrearProducto(Productos producto)
         {
             using var conexion = new SqliteConnection(cadenaConexion);
             conexion.Open();
-            string sql = "INSERT INTO Productos(IdProducto, Descripcion, Precio) VALUES(@IdProducto, @Descripcion, @Precio)";
+            string sql = "INSERT INTO Productos(Descripcion, Precio) VALUES(@Descripcion, @Precio)";
             using var comando = new SqliteCommand(sql, conexion);
-            comando.Parameters.Add(new SqliteParameter("@IdProducto", producto.IdProducto));
             comando.Parameters.Add(new SqliteParameter("@Descripcion", producto.Descripcion));
             comando.Parameters.Add(new SqliteParameter("@Precio", producto.Precio));
             comando.ExecuteNonQuery();

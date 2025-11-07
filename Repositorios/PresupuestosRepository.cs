@@ -1,21 +1,20 @@
 using tl2_tp8_2025_Gonz0x.Models;
 using Microsoft.Data.Sqlite;
 
-namespace tl2_tp7_2025_Gonz0x.Repositorios.PresupuestosRepository
+namespace tl2_tp8_2025_Gonz0x.Repositorios
 {
     public class PresupuestosRepository
     {
-        private string cadenaConexion = "Data Source=Tienda.db";
+        private string cadenaConexion = "Data Source=DB/Tienda.db";
         
         public void CrearPresupuesto(Presupuestos presupuesto)
         {
             using var conexion = new SqliteConnection(cadenaConexion);
             conexion.Open();
-            string sql = "INSERT INTO Presupuestos(IdPresupuesto, NombreDestinatario, FechaCreacion) VALUES(@IdPresupuesto, @NombreDestinatario, @FechaCreacion)";
+            string sql = "INSERT INTO Presupuestos(NombreDestinatario, FechaCreacion) VALUES(@NombreDestinatario, @FechaCreacion)";
             using var comando = new SqliteCommand(sql, conexion);
-            comando.Parameters.Add(new SqliteParameter("@IdPresupuesto", presupuesto.IdPresupuesto));
             comando.Parameters.Add(new SqliteParameter("@NombreDestinatario", presupuesto.NombreDestinatario));
-            comando.Parameters.Add(new SqliteParameter("@FechaCreacion", presupuesto.FechaCreacion));
+            comando.Parameters.Add(new SqliteParameter("@FechaCreacion", DateTime.Now));
             //comando.Parameters.Add(new SqliteParameter("@Detalle", presupuesto.Detalle));
             comando.ExecuteNonQuery();
         }
@@ -147,7 +146,43 @@ namespace tl2_tp7_2025_Gonz0x.Repositorios.PresupuestosRepository
             return presupuesto;
         }
 
-        public void EliminarPresupuesto(int id)
+        public void ModificarPresupuesto(int id, Presupuestos presupuesto)
+        {
+            using var conexion = new SqliteConnection(cadenaConexion);
+            conexion.Open();
+
+            // Obtener FechaCreacion original
+            string sqlFecha = "SELECT FechaCreacion FROM Presupuestos WHERE IdPresupuesto = @IdPresupuesto";
+            using var cmdFecha = new SqliteCommand(sqlFecha, conexion);
+            cmdFecha.Parameters.Add(new SqliteParameter("@IdPresupuesto", id));
+            var fechaOriginal = cmdFecha.ExecuteScalar();
+
+            if (fechaOriginal == null)
+                return;
+
+            presupuesto.FechaCreacion = DateTime.Parse(fechaOriginal.ToString()!);
+
+            // Actualizar solo nombre (y mantener fecha)
+            string sql = "UPDATE Presupuestos SET NombreDestinatario = @NombreDestinatario, FechaCreacion = @FechaCreacion WHERE IdPresupuesto = @IdPresupuesto";
+            using var comando = new SqliteCommand(sql, conexion);
+            comando.Parameters.Add(new SqliteParameter("@NombreDestinatario", presupuesto.NombreDestinatario));
+            comando.Parameters.Add(new SqliteParameter("@FechaCreacion", presupuesto.FechaCreacion));
+            comando.Parameters.Add(new SqliteParameter("@IdPresupuesto", id));
+
+            comando.ExecuteNonQuery();
+            /*using var conexion = new SqliteConnection(cadenaConexion);
+            conexion.Open();
+
+            string sql = "UPDATE Presupuestos SET NombreDestinatario = @NombreDestinatario, FechaCreacion = @FechaCreacion WHERE IdPresupuesto = @IdPresupuesto";
+            using var comando = new SqliteCommand(sql, conexion);
+            comando.Parameters.Add(new SqliteParameter("@NombreDestinatario", presupuesto.NombreDestinatario));
+            comando.Parameters.Add(new SqliteParameter("@FechaCreacion", presupuesto.FechaCreacion));
+            comando.Parameters.Add(new SqliteParameter("@IdPresupuesto", id));
+            comando.ExecuteNonQuery();*/
+        }
+
+
+        /*public void EliminarPresupuesto(int id)
         {
             using var conexion = new SqliteConnection(cadenaConexion);
             conexion.Open();
@@ -155,6 +190,25 @@ namespace tl2_tp7_2025_Gonz0x.Repositorios.PresupuestosRepository
             using var comando = new SqliteCommand(sql, conexion);
             comando.Parameters.Add(new SqliteParameter("@IdPresupuesto", id));
             comando.ExecuteNonQuery();
+        }*/
+
+        public void EliminarPresupuesto(int id)
+        {
+            using var conexion = new SqliteConnection(cadenaConexion);
+            conexion.Open();
+
+            // Borrar detalle primero
+            string sqlDetalle = "DELETE FROM PresupuestosDetalle WHERE IdPresupuesto = @IdPresupuesto";
+            using var cmdDetalle = new SqliteCommand(sqlDetalle, conexion);
+            cmdDetalle.Parameters.Add(new SqliteParameter("@IdPresupuesto", id));
+            cmdDetalle.ExecuteNonQuery();
+
+            // Luego borrar el presupuesto
+            string sql = "DELETE FROM Presupuestos WHERE IdPresupuesto = @IdPresupuesto";
+            using var comando = new SqliteCommand(sql, conexion);
+            comando.Parameters.Add(new SqliteParameter("@IdPresupuesto", id));
+            comando.ExecuteNonQuery();
         }
+
     }
 }

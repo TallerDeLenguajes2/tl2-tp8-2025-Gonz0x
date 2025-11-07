@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using tl2_tp8_2025_Gonz0x.Models;
-using tl2_tp8_2025_Gonz0x.Repositorios.ProductosRepository;
-
+using tl2_tp8_2025_Gonz0x.Repositorios;
 namespace tl2_tp8_2025_Gonz0x
 {
     public class ProductosController : Controller
@@ -47,7 +46,7 @@ namespace tl2_tp8_2025_Gonz0x
                 return View(nuevo);
 
             _productosRepository.CrearProducto(nuevo);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Productos");
         }
 
         // GET: /Productos/Edit/5
@@ -68,9 +67,12 @@ namespace tl2_tp8_2025_Gonz0x
             if (!ModelState.IsValid)
                 return View(productoEditado);
 
-            _productosRepository.ModificarProducto(productoEditado);
-            return RedirectToAction("Index");
+            // Pasamos el Id y el objeto completo
+            _productosRepository.ModificarProducto(productoEditado.IdProducto, productoEditado);
+
+            return RedirectToAction("Index", "Productos");
         }
+
 
         // GET: /Productos/Delete/5
         [HttpGet]
@@ -85,9 +87,9 @@ namespace tl2_tp8_2025_Gonz0x
 
         // POST: /Productos/Delete
         [HttpPost]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult Delete(Productos producto)
         {
-            _productosRepository.EliminarProducto(id);
+            _productosRepository.EliminarProducto(producto.IdProducto);
             return RedirectToAction("Index");
         }
     }

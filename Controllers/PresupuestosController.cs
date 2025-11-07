@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using tl2_tp8_2025_Gonz0x.Models;
-using tl2_tp8_2025_Gonz0x.Repositorios.PresupuestosRepository;
+using tl2_tp8_2025_Gonz0x.Repositorios;
 
 namespace tl2_tp8_2025_Gonz0x.Controllers
 {
@@ -45,11 +45,13 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       {
          if (!ModelState.IsValid)
                return View(nuevo);
-
+         
+         nuevo.FechaCreacion = DateTime.Now;  //aseguro la fecha
          _presupuestosRepository.CrearPresupuesto(nuevo);
          return RedirectToAction("Index");
       }
       // GET: /Presupuestos/Edit/5
+      [HttpGet]
       public IActionResult Edit(int id)
       {
          var presupuesto = _presupuestosRepository.ObtenerPresupuestoPorId(id);
@@ -61,14 +63,16 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
 
       // POST: /Presupuestos/Edit/5
       [HttpPost]
-      public IActionResult Edit(Presupuestos presupuesto)
+      public IActionResult Edit(int id, Presupuestos presupuesto)
       {
          if (!ModelState.IsValid)
-               return View(presupuesto);
+            return View(presupuesto);
 
-         _presupuestosRepository.ModificarPresupuesto(presupuesto.IdPresupuesto, presupuesto);
-         return RedirectToAction(nameof(Index));
+         _presupuestosRepository.ModificarPresupuesto(id, presupuesto);
+
+         return RedirectToAction("Index");
       }
+
 
       // GET: /Presupuestos/Delete/5
       public IActionResult Delete(int id)
@@ -82,17 +86,17 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
 
       // POST: /Presupuestos/Delete/5
       [HttpPost]
-      public IActionResult Delete(int id)
+      public IActionResult Delete(Presupuestos presupuesto)
       {
          try
          {
-               _presupuestosRepository.EliminarPresupuesto(id);
-               return RedirectToAction("Index");
+            _presupuestosRepository.EliminarPresupuesto(presupuesto.IdPresupuesto);
+            return RedirectToAction("Index");
          }
          catch
          {
-               TempData["Error"] = "No se puede eliminar: El presupuesto tiene productos cargados.";
-               return RedirectToAction("Index");
+            TempData["Error"] = "No se puede eliminar: El presupuesto tiene productos cargados.";
+            return RedirectToAction("Index");
          }
       }
    }

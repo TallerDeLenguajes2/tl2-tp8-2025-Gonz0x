@@ -7,7 +7,7 @@
     <p><strong>@Model.Descripcion</strong> - Precio: @Model.Precio.ToString("C")</p>
 </div>
 
-<form asp-action="DeleteConfirmed" method="post">
+<form asp-action="Delete" method="post">
     <input type="hidden" asp-for="IdProducto" />
     <button type="submit" class="btn btn-danger">Eliminar</button>
     <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
