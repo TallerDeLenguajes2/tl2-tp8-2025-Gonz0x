@@ -14,7 +14,7 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             string sql = "INSERT INTO Presupuestos(NombreDestinatario, FechaCreacion) VALUES(@NombreDestinatario, @FechaCreacion)";
             using var comando = new SqliteCommand(sql, conexion);
             comando.Parameters.Add(new SqliteParameter("@NombreDestinatario", presupuesto.NombreDestinatario));
-            comando.Parameters.Add(new SqliteParameter("@FechaCreacion", DateTime.Now));
+            comando.Parameters.Add(new SqliteParameter("@FechaCreacion", presupuesto.FechaCreacion));
             //comando.Parameters.Add(new SqliteParameter("@Detalle", presupuesto.Detalle));
             comando.ExecuteNonQuery();
         }
@@ -114,7 +114,7 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
 
             lector.Close();
 
-            // 2️⃣ Obtener los productos asociados a ese presupuesto
+            // Obtener los productos asociados a ese presupuesto
             string sqlDetalle = @"
                 SELECT pd.IdProducto, p.Descripcion, p.Precio, pd.Cantidad
                 FROM PresupuestosDetalle pd

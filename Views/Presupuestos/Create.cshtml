@@ -1,4 +1,4 @@
-@model tl2_tp8_2025_Gonz0x.Models.Presupuestos
+@model tl2_tp8_2025_Gonz0x.ViewModels.PresupuestoViewModel
 
 <h2>Crear Presupuesto</h2>
 
@@ -6,7 +6,18 @@
     <div class="mb-3">
         <label asp-for="NombreDestinatario" class="form-label">Nombre del Destinatario</label>
         <input asp-for="NombreDestinatario" class="form-control" />
+        <span asp-validation-for="NombreDestinatario" class="text-danger"></span>
     </div>
+    <div class="mb-3">
+    <label asp-for="FechaCreacion"></label>
+    <input asp-for="FechaCreacion" type="date" class="form-control"/>
+    <span asp-validation-for="FechaCreacion" class="text-danger"></span>
+</div>
+
     <button type="submit" class="btn btn-success">Guardar</button>
     <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
 </form>
+
+@section Scripts {
+ <partial name="_ValidationScriptsPartial" />
+}

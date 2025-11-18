@@ -1,0 +1,30 @@
+@model tl2_tp8_2025_Gonz0x.ViewModels.AgregarProductoViewModel
+@{
+ ViewData["Title"] = "Agregar Producto al Presupuesto";
+}
+<h2>Agregar Producto al Presupuesto Nro @Model.IdPresupuesto</h2>
+<hr />
+
+<form asp-controller="Presupuestos" asp-action="AgregarProducto" method="post">
+    <input type="hidden" asp-for="IdPresupuesto" />
+    <div class="form-group">
+        <label asp-for="IdProducto"></label>
+        <select asp-for="IdProducto" asp-items="Model.ListaProductos" class="form-control"></select>
+        <span asp-validation-for="IdProducto" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Cantidad"></label>
+        <input asp-for="Cantidad" class="form-control" />
+        <span asp-validation-for="Cantidad" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Agregar</button>
+</form>
+
+
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,18 +1,23 @@
-@model tl2_tp8_2025_Gonz0x.Models.Productos
+@model tl2_tp8_2025_Gonz0x.ViewModels.ProductoViewModel
 
 <h2>Crear Producto</h2>
 
-<form asp-controller="Productos" asp-action="Create" method="post">
+<form asp-action="Create">
     <div class="form-group">
-        <label asp-for="Descripcion" class="form-label"></label>
+        <label asp-for="Descripcion"></label>
         <input asp-for="Descripcion" class="form-control" />
+        <span asp-validation-for="Descripcion" class="text-danger"></span>
     </div>
 
-    <div class="form-group mt-2">
-        <label asp-for="Precio" class="form-label"></label>
+    <div class="form-group">
+        <label asp-for="Precio"></label>
         <input asp-for="Precio" class="form-control" />
+        <span asp-validation-for="Precio" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-3">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary mt-3">Cancelar</a>
+    <button type="submit" class="btn btn-success">Guardar</button>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
