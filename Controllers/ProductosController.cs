@@ -2,21 +2,45 @@ using Microsoft.AspNetCore.Mvc;
 using tl2_tp8_2025_Gonz0x.Models;
 using tl2_tp8_2025_Gonz0x.Repositorios;
 using tl2_tp8_2025_Gonz0x.ViewModels; //  AGREGO
+using tl2_tp8_2025_Gonz0x.Interfaces;
+
 namespace tl2_tp8_2025_Gonz0x
 {
     public class ProductosController : Controller
     {
+
+        private readonly IProductoRepository _productosRepository;
+        private readonly IAuthenticationService _auth;
+
+        // CONSTRUCTOR CON INYECCIÓN DE DEPENDENCIAS
+        public ProductosController(
+            IProductoRepository productosRepository,
+            IAuthenticationService auth
+        )
+        {
+            _productosRepository = productosRepository;
+            _auth = auth;
+        }
+        /*
         private readonly ProductosRepository _productosRepository;
 
         public ProductosController()
         {
             _productosRepository = new ProductosRepository();
         }
-
+        */
         // GET: /Productos
         [HttpGet]
         public IActionResult Index()
         {
+            if (!_auth.IsAuthenticated())
+            return RedirectToAction("Index", "Login");        
+            
+            if (!(_auth.HasAccessLevel("Administrador") || _auth.HasAccessLevel("Cliente")))
+            {
+                return RedirectToAction(nameof(AccesoDenegado));
+            }  
+
             List<Productos> productos = _productosRepository.ListarProductos();
             return View(productos);
         }
@@ -25,6 +49,15 @@ namespace tl2_tp8_2025_Gonz0x
         [HttpGet]
         public IActionResult Details(int id)
         {
+
+            if (!_auth.IsAuthenticated())
+            return RedirectToAction("Index", "Login");        
+            
+            if (!(_auth.HasAccessLevel("Administrador") || _auth.HasAccessLevel("Cliente")))
+            {
+                return RedirectToAction(nameof(AccesoDenegado));
+            }  
+
             var producto = _productosRepository.ObtenerProductoPorId(id);
             if (producto == null)
                 return NotFound();
@@ -36,6 +69,13 @@ namespace tl2_tp8_2025_Gonz0x
         [HttpGet]
         public IActionResult Create()
         {
+
+            if (!_auth.IsAuthenticated())
+            return RedirectToAction("Index", "Login");
+
+            if (!_auth.HasAccessLevel("Administrador"))
+            return RedirectToAction(nameof(AccesoDenegado));       
+
             return View();
         }
 
@@ -53,6 +93,13 @@ namespace tl2_tp8_2025_Gonz0x
         [HttpPost]
         public IActionResult Create(ProductoViewModel vm)
         {
+
+            if (!_auth.IsAuthenticated())
+            return RedirectToAction("Index", "Login");
+
+            if (!_auth.HasAccessLevel("Administrador"))
+            return RedirectToAction(nameof(AccesoDenegado));              
+
             if (!ModelState.IsValid)
             {
                 return View(vm);//Devolvemos el ViewModel con los datos y errores a la Vista
@@ -73,6 +120,13 @@ namespace tl2_tp8_2025_Gonz0x
         [HttpGet]
         public IActionResult Edit(int id)
         {
+
+            if (!_auth.IsAuthenticated())
+            return RedirectToAction("Index", "Login");
+
+            if (!_auth.HasAccessLevel("Administrador"))
+            return RedirectToAction("AccesoDenegado"); 
+
             var producto = _productosRepository.ObtenerProductoPorId(id);
             if (producto == null)
                 return NotFound();
@@ -103,6 +157,13 @@ namespace tl2_tp8_2025_Gonz0x
         [HttpPost]
         public IActionResult Edit(int id, ProductoViewModel vm)
         {
+
+            if (!_auth.IsAuthenticated())
+            return RedirectToAction("Index", "Login");
+
+            if (!_auth.HasAccessLevel("Administrador"))
+            return RedirectToAction("AccesoDenegado");            
+
             if (!ModelState.IsValid)
             {
                 return View(vm);
@@ -124,6 +185,13 @@ namespace tl2_tp8_2025_Gonz0x
         [HttpGet]
         public IActionResult Delete(int id)
         {
+
+            if (!_auth.IsAuthenticated())
+            return RedirectToAction("Index", "Login");
+
+            if (!_auth.HasAccessLevel("Administrador"))
+            return RedirectToAction("AccesoDenegado"); 
+
             var producto = _productosRepository.ObtenerProductoPorId(id);
             if (producto == null)
                 return NotFound();
@@ -135,8 +203,22 @@ namespace tl2_tp8_2025_Gonz0x
         [HttpPost]
         public IActionResult Delete(Productos producto)
         {
+
+            if (!_auth.IsAuthenticated())
+            return RedirectToAction("Index", "Login");
+
+            if (!_auth.HasAccessLevel("Administrador"))
+            return RedirectToAction("AccesoDenegado"); 
+
             _productosRepository.EliminarProducto(producto.IdProducto);
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+        public IActionResult AccesoDenegado()
+        {
+            return View();
+        }
+
     }
 }

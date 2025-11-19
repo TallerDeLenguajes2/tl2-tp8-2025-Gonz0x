@@ -1,12 +1,18 @@
+using tl2_tp8_2025_Gonz0x.Interfaces;
 using tl2_tp8_2025_Gonz0x.Models;
 using Microsoft.Data.Sqlite;
 
 namespace tl2_tp8_2025_Gonz0x.Repositorios
 {
-    public class PresupuestosRepository
+    public class PresupuestosRepository : IPresupuestoRepository
     {
-        private string cadenaConexion = "Data Source=DB/Tienda.db";
+        private string cadenaConexion = "Data Source=DB/Tienda.db";        
         
+        public PresupuestosRepository(string cadenaConexion)
+        {
+            this.cadenaConexion = cadenaConexion;
+        }
+
         public void CrearPresupuesto(Presupuestos presupuesto)
         {
             using var conexion = new SqliteConnection(cadenaConexion);

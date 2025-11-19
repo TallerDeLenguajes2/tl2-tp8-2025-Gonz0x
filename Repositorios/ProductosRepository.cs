@@ -1,12 +1,18 @@
+using tl2_tp8_2025_Gonz0x.Interfaces;
 using tl2_tp8_2025_Gonz0x.Models;
 using Microsoft.Data.Sqlite;
 
 namespace tl2_tp8_2025_Gonz0x.Repositorios
 {
-    public class ProductosRepository
+    public class ProductosRepository : IProductoRepository
     {
         private string cadenaConexion = "Data Source=DB/Tienda.db";
 
+        public ProductosRepository(string cadenaConexion)
+        {
+            this.cadenaConexion = cadenaConexion;
+        }
+        
         public void CrearProducto(Productos producto)
         {
             using var conexion = new SqliteConnection(cadenaConexion);

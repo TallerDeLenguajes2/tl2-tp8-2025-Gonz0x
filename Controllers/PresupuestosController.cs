@@ -2,12 +2,55 @@ using Microsoft.AspNetCore.Mvc;
 using tl2_tp8_2025_Gonz0x.Models;
 using tl2_tp8_2025_Gonz0x.Repositorios;
 using tl2_tp8_2025_Gonz0x.ViewModels;
+using tl2_tp8_2025_Gonz0x.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace tl2_tp8_2025_Gonz0x.Controllers
 {
    public class PresupuestosController : Controller
    {
+      private readonly IPresupuestoRepository _presupuestosRepository;
+      private readonly IProductoRepository _productosRepository;
+      private readonly IAuthenticationService _auth;
+
+        // Constructor con DI
+      public PresupuestosController(
+         IPresupuestoRepository presupuestosRepository,
+         IProductoRepository productosRepository,
+         IAuthenticationService auth
+      )
+      {
+         _presupuestosRepository = presupuestosRepository;
+         _productosRepository = productosRepository;
+         _auth = auth;
+      }
+
+      // ADMIN o CLIENTE
+      private IActionResult CheckReadPermissions()
+      {
+         if (!_auth.IsAuthenticated())
+               return RedirectToAction("Index", "Login");
+
+         if (!(_auth.HasAccessLevel("Administrador") ||
+               _auth.HasAccessLevel("Cliente")))
+               return RedirectToAction(nameof(AccesoDenegado));
+
+         return null;
+      }
+
+      // SOLO ADMIN
+      private IActionResult CheckAdminPermissions()
+      {
+         if (!_auth.IsAuthenticated())
+               return RedirectToAction("Index", "Login");
+
+         if (!_auth.HasAccessLevel("Administrador"))
+               return RedirectToAction(nameof(AccesoDenegado));
+
+         return null;
+      }
+
+      /*
       private readonly PresupuestosRepository _presupuestosRepository;
       private readonly ProductosRepository _productosRepository;
 
@@ -16,11 +59,15 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
          _presupuestosRepository = new PresupuestosRepository();
          _productosRepository = new ProductosRepository();
       }
+      */
 
       // GET: /Presupuestos
       [HttpGet]
       public IActionResult Index()
       {
+         var perm = CheckReadPermissions();
+         if (perm != null) return perm;
+
          List<Presupuestos> presupuestos = _presupuestosRepository.ListarPresupuestos();
          return View(presupuestos);
       }
@@ -29,6 +76,9 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       [HttpGet]
       public IActionResult Details(int id)
       {
+         var perm = CheckReadPermissions();
+         if (perm != null) return perm;
+
          var presupuesto = _presupuestosRepository.ObtenerPresupuestoPorId(id);
          if (presupuesto == null)
                return NotFound();
@@ -40,6 +90,9 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       [HttpGet]
       public IActionResult Create()
       {
+         var perm = CheckAdminPermissions();
+         if (perm != null) return perm;
+         
          return View();
       }
 
@@ -58,11 +111,14 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       [HttpPost]
       public IActionResult Create(PresupuestoViewModel vm)
       {
-/*          if (vm.FechaCreacion > DateTime.Now)
+       /*if (vm.FechaCreacion > DateTime.Now)
          {
             ModelState.AddModelError("FechaCreacion", "La fecha no puede ser futura.");
-         }
- */
+         } */
+
+         var perm = CheckAdminPermissions();
+         if (perm != null) return perm;
+
          if (!ModelState.IsValid)
          {
             return View(vm);
@@ -83,6 +139,10 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       [HttpGet]
       public IActionResult Edit(int id)
       {
+
+         var perm = CheckAdminPermissions();
+         if (perm != null) return perm;
+
          var presupuesto = _presupuestosRepository.ObtenerPresupuestoPorId(id);
          if (presupuesto == null)
             return NotFound();
@@ -93,13 +153,17 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
             FechaCreacion = presupuesto.FechaCreacion
          };
 
-    return View(vm);
+         return View(vm);
       }
 
       // POST: /Presupuestos/Edit/5
       [HttpPost]
       public IActionResult Edit(int id, PresupuestoViewModel vm)
       {
+
+         var perm = CheckAdminPermissions();
+         if (perm != null) return perm;
+
          if (!ModelState.IsValid)
          {
             return View(vm);
@@ -120,6 +184,10 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       // GET: /Presupuestos/Delete/5
       public IActionResult Delete(int id)
       {
+
+         var perm = CheckAdminPermissions();
+         if (perm != null) return perm;
+
          var presupuesto = _presupuestosRepository.ObtenerPresupuestoPorId(id);
          if (presupuesto == null)
                return NotFound();
@@ -131,6 +199,10 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       [HttpPost]
       public IActionResult Delete(Presupuestos presupuesto)
       {
+
+         var perm = CheckAdminPermissions();
+         if (perm != null) return perm;
+
          try
          {
             _presupuestosRepository.EliminarPresupuesto(presupuesto.IdPresupuesto);
@@ -146,6 +218,9 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       [HttpGet]
       public IActionResult AgregarProducto(int id)
       {
+         var perm = CheckAdminPermissions();
+         if (perm != null) return perm;
+
          // 1. Obtener los productos para el SelectList
          List<Productos> productos = _productosRepository.ListarProductos();
 
@@ -163,6 +238,10 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
       [HttpPost]
       public IActionResult AgregarProducto(AgregarProductoViewModel vm)
       {
+
+         var perm = CheckAdminPermissions();
+         if (perm != null) return perm;
+
          if (!ModelState.IsValid)
          {
             vm.ListaProductos = new SelectList(_productosRepository.ListarProductos(), "IdProducto", "Descripcion");
@@ -178,6 +257,13 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
 
          return RedirectToAction("Details", new { id = vm.IdPresupuesto });
       }
+
+      [HttpGet]
+      public IActionResult AccesoDenegado()
+      {
+         return View();
+      }
+
 
       // POST: Presupuestos/AgregarProducto
 /*       [HttpPost]

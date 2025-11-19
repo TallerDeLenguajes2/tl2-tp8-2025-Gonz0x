@@ -1,0 +1,22 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Acceso Restringido";
+}
+
+<div class="row">
+    <div class="col-md-10 mx-auto text-center">
+        <h1 class="text-danger"> Acceso Restringido</h1>
+        <hr />
+
+        <h2>No tiene permisos suficientes</h2>
+        <p>
+            Esta operación solo puede ser realizada por usuarios con rol
+            <strong>Administrador</strong>.
+        </p>
+
+        <div class="mt-4">
+            <a asp-action="Index" class="btn btn-primary">Volver al Listado de Productos</a>
+            <a asp-controller="Login" asp-action="Logout" class="btn btn-secondary">Cerrar Sesión</a>
+        </div>
+    </div>
+</div>
