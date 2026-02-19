@@ -1,7 +1,6 @@
 using tl2_tp8_2025_Gonz0x.Interfaces;
 using tl2_tp8_2025_Gonz0x.Repositorios;
 using tl2_tp8_2025_Gonz0x.Services;
-using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,25 +17,28 @@ builder.Services.AddSession(options =>
 });
 
 // -------------------------
-//     INYECCIÓN DE DEPENDENCIAS (DI)
+//     MVC
 // -------------------------
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Repositorios CON cadena de conexión
-builder.Services.AddScoped<IProductoRepository>(sp =>
-    new ProductosRepository(connectionString));
-
-builder.Services.AddScoped<IPresupuestoRepository>(sp =>
-    new PresupuestosRepository(connectionString));
-
-builder.Services.AddScoped<IUserRepository>(sp =>
-    new UsuarioRepository(connectionString));
-
-// Servicios
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-
-// MVC
 builder.Services.AddControllersWithViews();
+
+// -------------------------
+//     CADENA DE CONEXIÓN
+// -------------------------
+var CadenaDeConexion = builder.Configuration
+    .GetConnectionString("SqliteConexion")!
+    .ToString();
+
+// Registrar la cadena como Singleton
+builder.Services.AddSingleton<string>(CadenaDeConexion);
+
+// -------------------------
+//     INYECCIÓN DE DEPENDENCIAS
+// -------------------------
+builder.Services.AddScoped<IProductoRepository, ProductosRepository>();
+builder.Services.AddScoped<IPresupuestoRepository, PresupuestosRepository>();
+builder.Services.AddScoped<IUserRepository, UsuarioRepository>();
+
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 // -------------------------
 //     PIPELINE

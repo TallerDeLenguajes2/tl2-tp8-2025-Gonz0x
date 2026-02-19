@@ -6,7 +6,7 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
 {
     public class ProductosRepository : IProductoRepository
     {
-        private string cadenaConexion = "Data Source=DB/Tienda.db";
+        private string cadenaConexion;
 
         public ProductosRepository(string cadenaConexion)
         {
@@ -21,9 +21,11 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             using var comando = new SqliteCommand(sql, conexion);
             comando.Parameters.Add(new SqliteParameter("@Descripcion", producto.Descripcion));
             comando.Parameters.Add(new SqliteParameter("@Precio", producto.Precio));
-            comando.ExecuteNonQuery();
+            int filas = comando.ExecuteNonQuery();
+            if(filas == 0)
+                throw new Exception("No se pudo crear el producto");
         }
-        
+
         public void ModificarProducto(int id, Productos producto)
         {
             using var conexion = new SqliteConnection(cadenaConexion);
@@ -33,7 +35,9 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             comando.Parameters.Add(new SqliteParameter("@idProducto", id));
             comando.Parameters.Add(new SqliteParameter("@Descripcion", producto.Descripcion));
             comando.Parameters.Add(new SqliteParameter("@Precio", producto.Precio));
-            comando.ExecuteNonQuery();
+            int filas = comando.ExecuteNonQuery();
+            if (filas == 0)
+                throw new Exception($"No existe el producto con ID {id}");
         }
 
         public List<Productos> ListarProductos()
@@ -54,6 +58,9 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
                 };
                 productos.Add(producto);
             }
+            if (productos.Count == 0)
+                throw new Exception("No existen productos cargados");
+
             return productos;
         }
 
@@ -65,17 +72,16 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             using var comando = new SqliteCommand(sql, conexion);
             comando.Parameters.Add(new SqliteParameter("@IdProducto", id));
             using var lector = comando.ExecuteReader();
-            if(lector.Read())
+            if (!lector.Read())
+                throw new Exception($"No existe el producto con ID {id}");
+
+            return new Productos
             {
-                var Producto = new Productos
-                {
-                    IdProducto = Convert.ToInt32(lector["IdProducto"]),
-                    Descripcion = lector["Descripcion"].ToString(),
-                    Precio = Convert.ToDouble(lector["Precio"])
-                };
-                return Producto;
-            }
-            return null;
+                IdProducto = Convert.ToInt32(lector["IdProducto"]),
+                Descripcion = lector["Descripcion"].ToString(),
+                Precio = Convert.ToDouble(lector["Precio"])
+            };
+
         }  
 
         public void EliminarProducto(int id)
@@ -85,7 +91,9 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             string sql = "DELETE FROM Productos WHERE idProducto = @idProducto";
             using var comando = new SqliteCommand(sql, conexion);
             comando.Parameters.Add(new SqliteParameter("@idProducto", id));
-            comando.ExecuteNonQuery();
+            int filas = comando.ExecuteNonQuery();
+            if (filas == 0)
+                throw new Exception($"No se pudo eliminar. Producto {id} inexistente");
         }
     }
 }

@@ -15,8 +15,6 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
 
         public Usuario? GetById(int id)
         {
-            Usuario? user = null;
-
             const string sql = @"
                 SELECT Id, Nombre, User, Pass, Rol
                 FROM Usuarios
@@ -28,21 +26,18 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
 
             using var comando = new SqliteCommand(sql, conexion);
             comando.Parameters.AddWithValue("@Id", id);
-
             using var reader = comando.ExecuteReader();
-            if (reader.Read())
-            {
-                user = new Usuario
-                {
-                    Id = reader.GetInt32(0),
-                    Nombre = reader.GetString(1),
-                    User = reader.GetString(2),
-                    Pass = reader.GetString(3),
-                    Rol = reader.GetString(4)
-                };
-            }
+            if (!reader.Read())
+                throw new Exception($"No existe el usuario con ID {id}");
 
-            return user;
+            return new Usuario
+            {
+                Id = reader.GetInt32(0),
+                Nombre = reader.GetString(1),
+                User = reader.GetString(2),
+                Pass = reader.GetString(3),
+                Rol = reader.GetString(4)
+            };
         }
 
         public Usuario? GetUser(string usuario, string contrasena)
@@ -63,19 +58,17 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             comando.Parameters.AddWithValue("@Contrasena", contrasena);
 
             using var reader = comando.ExecuteReader();
-            if (reader.Read())
-            {
-                user = new Usuario
-                {
-                    Id = reader.GetInt32(0),
-                    Nombre = reader.GetString(1),
-                    User = reader.GetString(2),
-                    Pass = reader.GetString(3),
-                    Rol = reader.GetString(4)
-                };
-            }
+            if (!reader.Read())
+                throw new Exception("Usuario o contraseña incorrectos");
 
-            return user;
+            return new Usuario
+            {
+                Id = reader.GetInt32(0),
+                Nombre = reader.GetString(1),
+                User = reader.GetString(2),
+                Pass = reader.GetString(3),
+                Rol = reader.GetString(4)
+            };
         }
     }
 }

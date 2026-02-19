@@ -17,54 +17,42 @@ namespace tl2_tp8_2025_Gonz0x.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public bool Login(string username, string password)
+        public void Login(string username, string password)
         {
-            var context = _httpContextAccessor.HttpContext;
+            var context = _httpContextAccessor.HttpContext
+                ?? throw new InvalidOperationException("HttpContext no está disponible.");
 
             var user = _userRepository.GetUser(username, password);
 
-            if (user != null)
-            {
-                if (context == null)
-                    throw new InvalidOperationException("HttpContext no está disponible.");
-
-                context.Session.SetString("IsAuthenticated", "true");
-                context.Session.SetString("User", user.User);
-                context.Session.SetString("UserNombre", user.Nombre);
-                context.Session.SetString("Rol", user.Rol);
-
-                return true;
-            }
-
-            return false;
+            context.Session.SetString("IsAuthenticated", "true");
+            context.Session.SetString("User", user.User);
+            context.Session.SetString("UserNombre", user.Nombre);
+            context.Session.SetString("Rol", user.Rol);
         }
+
+
+
 
         public void Logout()
         {
-            var context = _httpContextAccessor.HttpContext;
-
-            if (context == null)
-                throw new InvalidOperationException("HttpContext no está disponible.");
+            var context = _httpContextAccessor.HttpContext
+                ?? throw new InvalidOperationException("HttpContext no está disponible.");
 
             context.Session.Clear();
         }
 
         public bool IsAuthenticated()
         {
-            var context = _httpContextAccessor.HttpContext;
-
-            if (context == null)
-                throw new InvalidOperationException("HttpContext no está disponible.");
+            var context = _httpContextAccessor.HttpContext
+                ?? throw new InvalidOperationException("HttpContext no está disponible.");
 
             return context.Session.GetString("IsAuthenticated") == "true";
         }
 
         public bool HasAccessLevel(string requiredAccessLevel)
         {
-            var context = _httpContextAccessor.HttpContext;
-
-            if (context == null)
-                throw new InvalidOperationException("HttpContext no está disponible.");
+            var context = _httpContextAccessor.HttpContext
+                ?? throw new InvalidOperationException("HttpContext no está disponible.");
 
             return context.Session.GetString("Rol") == requiredAccessLevel;
         }
@@ -72,23 +60,17 @@ namespace tl2_tp8_2025_Gonz0x.Services
         public Usuario? CurrentUser()
         {
             var context = _httpContextAccessor.HttpContext;
-
-            if (context == null)
-                return null;
+            if (context == null) return null;
 
             var username = context.Session.GetString("User");
-            var nombre = context.Session.GetString("UserNombre");
-            var rol = context.Session.GetString("Rol");
-
             if (username == null) return null;
 
             return new Usuario
             {
                 User = username,
-                Nombre = nombre,
-                Rol = rol
+                Nombre = context.Session.GetString("UserNombre"),
+                Rol = context.Session.GetString("Rol")
             };
         }
-
     }
 }

@@ -14,15 +14,14 @@ namespace tl2_tp8_2025_Gonz0x.ViewModels
         [Display(Name = "Fecha de Creación")]
         [Required(ErrorMessage = "Debe ingresar una fecha.")]
         [DataType(DataType.Date)]
-        //[CustomValidation(typeof(PresupuestoViewModel), nameof(ValidarFechaNoFutura))]
+        [CustomValidation(typeof(PresupuestoViewModel), nameof(ValidarFechaNoFutura))]
         public DateTime FechaCreacion { get; set; }
-
-/*         public static ValidationResult? ValidarFechaNoFutura(DateTime fecha, ValidationContext context)
+        public static ValidationResult? ValidarFechaNoFutura(DateTime fecha, ValidationContext context)
         {
             if (fecha > DateTime.Today)
                 return new ValidationResult("La fecha no puede ser futura.");
 
             return ValidationResult.Success;
-        } */
+        }
     }
 }

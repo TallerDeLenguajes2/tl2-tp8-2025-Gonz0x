@@ -7,10 +7,14 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
     public class AuthenticationController : Controller
     {
         private readonly IAuthenticationService _authService;
+        private readonly ILogger<AuthenticationController> _logger;
 
-        public AuthenticationController(IAuthenticationService authService)
+        public AuthenticationController(
+            IAuthenticationService authService,
+            ILogger<AuthenticationController> logger)
         {
             _authService = authService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -25,18 +29,38 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
             if (!ModelState.IsValid)
                 return View("~/Views/Login/Index.cshtml", model);
 
-            bool success = _authService.Login(model.Username, model.Password);
+            try
+            {
+                _authService.Login(model.Username, model.Password); // void
 
-            if (success)
+                _logger.LogInformation("El usuario {Usuario} ingresó correctamente", model.Username);
+
                 return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                // Acceso inválido
+                _logger.LogWarning(
+                    "Intento de acceso inválido. Usuario: {Usuario}. Clave ingresada: {Clave}",
+                    model.Username,
+                    model.Password
+                );
 
-            model.ErrorMessage = "Usuario o contraseña incorrectos";
-            return View("~/Views/Login/Index.cshtml", model);
+                // Errores en ejecución
+                _logger.LogError(ex.ToString());
+
+                model.ErrorMessage = ex.Message;
+                return View("~/Views/Login/Index.cshtml", model);
+            }
         }
+
+
 
         public IActionResult Logout()
         {
             _authService.Logout();
+            _logger.LogInformation("Usuario cerró sesión");
+
             return RedirectToAction("Index", "Home");
         }
     }

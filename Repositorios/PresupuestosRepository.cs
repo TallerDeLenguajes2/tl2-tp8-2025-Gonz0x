@@ -6,7 +6,7 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
 {
     public class PresupuestosRepository : IPresupuestoRepository
     {
-        private string cadenaConexion = "Data Source=DB/Tienda.db";        
+        private string cadenaConexion;        
         
         public PresupuestosRepository(string cadenaConexion)
         {
@@ -22,7 +22,9 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             comando.Parameters.Add(new SqliteParameter("@NombreDestinatario", presupuesto.NombreDestinatario));
             comando.Parameters.Add(new SqliteParameter("@FechaCreacion", presupuesto.FechaCreacion));
             //comando.Parameters.Add(new SqliteParameter("@Detalle", presupuesto.Detalle));
-            comando.ExecuteNonQuery();
+            int filas = comando.ExecuteNonQuery();
+            if (filas == 0)
+                throw new Exception("No se pudo crear el presupuesto");
         }
 
         public List<Presupuestos> ListarPresupuestos()
@@ -39,11 +41,15 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
                 {
                     IdPresupuesto = Convert.ToInt32(reader["IdPresupuesto"]),
                     NombreDestinatario = reader["NombreDestinatario"].ToString(), 
-                    FechaCreacion = DateTime.Parse(reader["FechaCreacion"].ToString()!),
+                    FechaCreacion = Convert.ToDateTime(reader["FechaCreacion"].ToString()!),
                     Detalle = new List<PresupuestosDetalle>()
                 };
                 presupuestos.Add(presupuesto);
             }
+            
+            if (presupuestos.Count == 0)
+                throw new Exception("No existen presupuestos cargados");
+            
             foreach (var presupuesto in presupuestos)
             {
                 string sqlDetalle = @"
@@ -68,7 +74,7 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
                     var detalle = new PresupuestosDetalle
                     {
                         Producto = producto,
-                        Cantidad = Convert.ToInt32(lectorDetalle["cantidad"])
+                        Cantidad = Convert.ToInt32(lectorDetalle["Cantidad"])
                     };
 
                     presupuesto.Detalle.Add(detalle);
@@ -80,6 +86,9 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
 
         public void AgregarProductoAPresupuesto(int idPresupuesto, int idProducto, int cantidad)
         {
+            if (cantidad <= 0)
+                throw new Exception("La cantidad debe ser mayor a cero");
+            
             using var conexion = new SqliteConnection(cadenaConexion);
             conexion.Open();
 
@@ -92,10 +101,13 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             comando.Parameters.Add(new SqliteParameter("@IdProducto", idProducto));
             comando.Parameters.Add(new SqliteParameter("@Cantidad", cantidad));
 
-            comando.ExecuteNonQuery();
+            int filas = comando.ExecuteNonQuery();
+            if (filas == 0)
+                throw new Exception("No se pudo agregar el producto al presupuesto");
+
         }
 
-        public Presupuestos? ObtenerPresupuestoPorId(int id)
+        public Presupuestos ObtenerPresupuestoPorId(int id)
         {
             using var conexion = new SqliteConnection(cadenaConexion);
             conexion.Open();
@@ -107,14 +119,14 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             using var lector = comando.ExecuteReader();
             if (!lector.Read())
             {
-                return null; // No existe
+                throw new Exception($"No existe el presupuesto con ID {id}");
             }
 
             var presupuesto = new Presupuestos
             {
                 IdPresupuesto = Convert.ToInt32(lector["IdPresupuesto"]),
                 NombreDestinatario = lector["NombreDestinatario"].ToString(),
-                FechaCreacion = DateTime.Parse(lector["FechaCreacion"].ToString()!),
+                FechaCreacion = Convert.ToDateTime(lector["FechaCreacion"].ToString()!),
                 Detalle = new List<PresupuestosDetalle>()
             };
 
@@ -164,7 +176,7 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             var fechaOriginal = cmdFecha.ExecuteScalar();
 
             if (fechaOriginal == null)
-                return;
+                throw new Exception($"No se pudo modificar. Presupuesto {id} inexistente");
 
             presupuesto.FechaCreacion = DateTime.Parse(fechaOriginal.ToString()!);
 
@@ -175,7 +187,10 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             comando.Parameters.Add(new SqliteParameter("@FechaCreacion", presupuesto.FechaCreacion));
             comando.Parameters.Add(new SqliteParameter("@IdPresupuesto", id));
 
-            comando.ExecuteNonQuery();
+            int filas = comando.ExecuteNonQuery();
+
+            if (filas == 0)
+                throw new Exception($"No se pudo modificar. Presupuesto {id} inexistente");
             /*using var conexion = new SqliteConnection(cadenaConexion);
             conexion.Open();
 
@@ -213,7 +228,9 @@ namespace tl2_tp8_2025_Gonz0x.Repositorios
             string sql = "DELETE FROM Presupuestos WHERE IdPresupuesto = @IdPresupuesto";
             using var comando = new SqliteCommand(sql, conexion);
             comando.Parameters.Add(new SqliteParameter("@IdPresupuesto", id));
-            comando.ExecuteNonQuery();
+            int filas = comando.ExecuteNonQuery();
+            if (filas == 0)
+                throw new Exception($"No se pudo eliminar. Presupuesto {id} inexistente");
         }
 
     }

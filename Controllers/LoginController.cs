@@ -7,42 +7,54 @@ namespace tl2_tp8_2025_Gonz0x.Controllers
     public class LoginController : Controller
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly ILogger<LoginController> _logger;
 
-        public LoginController(IAuthenticationService authenticationService)
+        public LoginController(
+            IAuthenticationService authenticationService,
+            ILogger<LoginController> logger)
         {
             _authenticationService = authenticationService;
+            _logger = logger;
         }
 
-        // [HttpGet] Muestra la vista de login
         [HttpGet]
         public IActionResult Index()
         {
             return View(new LoginViewModel());
         }
 
-        // [HttpPost] Procesa el login
         [HttpPost]
         public IActionResult Login(LoginViewModel model)
         {
-            if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
-            {
-                model.ErrorMessage = "Debe ingresar usuario y contraseña.";
-                return View("Index", model);
-            }
+            try {
+                if (!ModelState.IsValid) return View("Index", model);
 
-            if (_authenticationService.Login(model.Username, model.Password))
-            {
+                _authenticationService.Login(model.Username, model.Password);
+
+                // ✅ LOG ACCESO EXITOSO (Consigna 1.1)
+                _logger.LogInformation("El usuario {Usuario} ingresó correctamente", model.Username);
+
                 return RedirectToAction("Index", "Home");
             }
+            catch (Exception ex) {
+                // ⚠️ LOG ACCESO RECHAZADO (Consigna 1.2)
+                _logger.LogWarning("Intento de acceso inválido + Usuario: {Usuario} + Clave ingresada: {Clave}", 
+                    model.Username, model.Password);
 
-            model.ErrorMessage = "Credenciales inválidas.";
-            return View("Index", model);
+                // ❌ LOG ERROR SERIALIZADO (Consigna 1.3)
+                _logger.LogError(ex.ToString());
+
+                model.ErrorMessage = ex.Message;
+                return View("Index", model);
+            }
         }
 
-        // [HttpGet] Cierra sesión
+        [HttpGet]
         public IActionResult Logout()
         {
             _authenticationService.Logout();
+            _logger.LogInformation("Usuario cerró sesión");
+
             return RedirectToAction("Index");
         }
     }
